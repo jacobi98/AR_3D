@@ -1,36 +1,138 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizzatore GLB</title>
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
-        model-viewer {
-            width: 100%;
-            height: 100vh;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AR — Desk (model-viewer)</title>
+
+  <!-- model-viewer (import moderno) -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <style>
+    :root{
+      --bg: #0b0b0b;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      background:var(--bg);
+      color:#fff;
+      font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .wrap {
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:20px;
+      padding:24px;
+      box-sizing:border-box;
+      flex-direction:column;
+    }
+
+    model-viewer {
+      width: min(960px, 95vw);
+      height: 70vh;
+      background: linear-gradient(180deg, #111, #050505);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    .info {
+      text-align:center;
+      max-width:900px;
+      font-size:0.95rem;
+      opacity:0.9;
+    }
+
+    .actions {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+
+    a.btn {
+      text-decoration:none;
+      padding:10px 14px;
+      border-radius:8px;
+      background:#1f2937;
+      color:#fff;
+      font-weight:600;
+      font-size:0.95rem;
+    }
+
+    a.small {
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.08);
+      padding:8px 12px;
+      font-weight:500;
+    }
+  </style>
 </head>
 <body>
-    <model-viewer 
-        src="desk.glb" 
-        ar 
-        ar-modes="webxr scene-viewer quick-look"
-        camera-controls 
-        auto-rotate
-        ar-scale="auto"
-        ios-src="desk.glb"
-        autoplay
-        animation-name="*">
-        
-        <button slot="ar-button" style="background-color: white; border: none; border-radius: 8px; padding: 12px 24px; font-size: 16px; cursor: pointer; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);">
-            📱 Visualizza in AR
-        </button>
+  <div class="wrap">
+    <h1 style="margin:0 0 8px 0">Desk — AR viewer</h1>
+
+    <!-- model-viewer: sostituisci src con "desk.glb" (file nello stesso folder) -->
+    <model-viewer id="mv"
+      src="desk.glb"
+      alt="Modello 3D: desk"
+      exposure="1"
+      shadow-intensity="1"
+      shadow-softness="0.5"
+      camera-controls
+      auto-rotate
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      ios-src=""
+      ar-scale="auto"
+      loading="auto"
+      reveal="interaction">
+      <!-- fallback per browser che non supportano model-viewer -->
+      <div class="info" slot="poster">Il tuo browser non supporta la visualizzazione interattiva del modello 3D.</div>
     </model-viewer>
+
+    <div class="actions">
+      <!-- Quick Look su iOS richiede file .usdz: se non ce l'hai, il pulsante Quick Look viene ignorato -->
+      <a class="btn" href="#" id="ar-btn">Apri in AR</a>
+      <a class="btn small" href="desk.glb" download>Scarica desk.glb</a>
+    </div>
+
+    <p class="info">
+      Suggerimenti: AR su Android usa WebXR (se supportato) o Scene Viewer; su iOS Quick Look richiede un file <code>.usdz</code>.
+      Per un'esperienza iOS nativa puoi convertire il GLB in USDZ e impostare l'attributo <code>ios-src="desk.usdz"</code>.
+      Assicurati che i file siano serviti via HTTPS o da <code>localhost</code>.
+    </p>
+  </div>
+
+  <script>
+    const mv = document.getElementById('mv');
+    const arBtn = document.getElementById('ar-btn');
+
+    // Pulsante che richiama l'overlay AR nativo quando possibile
+    arBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      // model-viewer espone showPosterToggle / enterAR in alcune versioni; la più compatibile è requestFullscreen/enterAR:
+      try {
+        if (mv.enterAR) {
+          await mv.enterAR();
+        } else {
+          // fallback: simuliamo click sul pulsante interno del model-viewer (se presente)
+          const arButton = mv.shadowRoot && mv.shadowRoot.querySelector('button[slot="ar-button"]');
+          if (arButton) arButton.click();
+        }
+      } catch (err) {
+        console.warn('Impossibile avviare AR:', err);
+        alert('Avvio AR non disponibile su questo dispositivo o browser. Usa Chrome su Android o Safari su iOS (con .usdz).');
+      }
+    });
+
+    // Se hai desk.usdz, imposta mv.setAttribute('ios-src','desk.usdz') oppure inseriscilo direttamente nell'HTML.
+    // Esempio (decommenta se hai il file desk.usdz nello stesso folder):
+    // mv.setAttribute('ios-src', 'desk.usdz');
+  </script>
 </body>
 </html>
