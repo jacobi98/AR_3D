@@ -1,18 +1,36 @@
 <!DOCTYPE html>
 <html lang="it">
-  <head>
-    <meta charset="UTF-8" />
-    <title>AR Viewer</title>
-    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizzatore GLB</title>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
     <style>
-      body { margin: 0; background: #000; }
-      model-viewer { width: 100vw; height: 100vh; }
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        model-viewer {
+            width: 100%;
+            height: 100vh;
+        }
     </style>
-  </head>
-  <body>
-    <model-viewer
-    camera-controls touch-action="pan-y" autoplay ar ar-modes="webxr scene-viewer" scale="0.2 0.2 0.2" shadow-intensity="1" src="modello.glb" alt="An animated 3D model of a robot"
-     
-    ></model-viewer>
-  </body>
+</head>
+<body>
+    <model-viewer 
+        src="modello.glb" 
+        ar 
+        ar-modes="webxr scene-viewer quick-look"
+        camera-controls 
+        auto-rotate
+        ar-scale="auto"
+        ios-src="modello.glb"
+        autoplay
+        animation-name="*">
+        
+        <button slot="ar-button" style="background-color: white; border: none; border-radius: 8px; padding: 12px 24px; font-size: 16px; cursor: pointer; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);">
+            📱 Visualizza in AR
+        </button>
+    </model-viewer>
+</body>
 </html>
