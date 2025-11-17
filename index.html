@@ -101,13 +101,11 @@
 
   <!-- 3D MODEL VIEWER -->
   <model-viewer id="viewer"
-    src="models/donna.glb"
-    ios-src="models/object1.usdz"
+    src=""
+    ios-src=""
     ar
     ar-modes="webxr scene-viewer quick-look"
     camera-controls
-    autoplay
-    animation-name="*"
     shadow-intensity="1">
   </model-viewer>
 
@@ -147,6 +145,18 @@
         startScreen.style.display = "none";
         viewer.style.display = "block";
         selector.style.display = "flex";
+        
+        // CARICA IL PRIMO MODELLO DOPO LA TRANSIZIONE
+        viewer.src = "models/donna.glb";
+        viewer.iosSrc = "models/object1.usdz";
+        viewer.animationName = "*";
+        
+        // Aspetta che il modello sia caricato
+        viewer.addEventListener('load', () => {
+          if (viewer.canActivateAR) {
+            console.log("AR disponibile!");
+          }
+        }, { once: true });
       }, 900);
     });
 
@@ -156,16 +166,19 @@
         let modelGLB = thumb.dataset.model;
         let modelUSDZ = thumb.dataset.usdz;
 
-        viewer.src = modelGLB;
-        viewer.iosSrc = modelUSDZ;
-        viewer.animationName = "*";
-
-        // Riavvia animazione
-        viewer.play();
-
         // Evidenzia thumb selezionato
         document.querySelectorAll(".thumb").forEach(t => t.classList.remove("selected"));
         thumb.classList.add("selected");
+
+        // Cambia modello
+        viewer.src = modelGLB;
+        viewer.iosSrc = modelUSDZ;
+        
+        // Quando il modello è caricato, avvia l'animazione
+        viewer.addEventListener('load', () => {
+          viewer.animationName = "*";
+          viewer.play();
+        }, { once: true });
       });
     });
   </script>
