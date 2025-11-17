@@ -50,7 +50,7 @@
       display: none;
     }
 
-    /* MINIATURE PANEL */
+    /* THUMBNAILS */
     #selector {
       position: absolute;
       bottom: 20px;
@@ -61,6 +61,7 @@
       justify-content: center;
       z-index: 5;
       padding: 10px;
+      display: none;
     }
 
     .thumb {
@@ -84,7 +85,6 @@
       height: 100%;
       object-fit: cover;
     }
-
   </style>
 </head>
 
@@ -100,30 +100,32 @@
 
   <!-- 3D MODEL VIEWER -->
   <model-viewer id="viewer"
-    src="donna.glb"
+    src="models/donna.glb"
+    ios-src="models/donna.usdz"
     autoplay
     animation-name="*"
     ar
+    ar-modes="webxr scene-viewer quick-look"
     camera-controls
     shadow-intensity="1"
     alt="Modello 3D">
   </model-viewer>
 
   <!-- MODEL SELECTOR -->
-  <div id="selector" style="display:none;">
-    <div class="thumb selected" data-model="models/donna.glb">
+  <div id="selector">
+    <div class="thumb selected" data-model="models/donna.glb" data-usdz="models/donna.usdz">
       <img src="thumbs/donna00.png">
     </div>
 
-    <div class="thumb" data-model="models/robot giallo.glb">
-      <img src="thumbs/robot giallo01.png">
+    <div class="thumb" data-model="models/robot_giallo.glb" data-usdz="models/robot_giallo.usdz">
+      <img src="thumbs/robot_giallo01.png">
     </div>
 
-    <div class="thumb" data-model="models/robot palla.glb">
-      <img src="thumbs/robot palla02.png">
+    <div class="thumb" data-model="models/robot_palla.glb" data-usdz="models/robot_palla.usdz">
+      <img src="thumbs/robot_palla02.png">
     </div>
 
-    <div class="thumb" data-model="models/topo.glb">
+    <div class="thumb" data-model="models/topo.glb" data-usdz="models/topo.usdz">
       <img src="thumbs/topo03.png">
     </div>
   </div>
@@ -136,7 +138,7 @@
     const selector = document.getElementById("selector");
     const music = document.getElementById("bgMusic");
 
-    // START → musica + fade + mostra modello
+    // START → musica + fade + mostra viewer
     startBtn.addEventListener("click", () => {
       music.play().catch(() => {});
       startScreen.style.opacity = 0;
@@ -152,13 +154,14 @@
     document.querySelectorAll(".thumb").forEach(thumb => {
       thumb.addEventListener("click", () => {
 
-        let model = thumb.dataset.model;
-        viewer.src = model;
+        let modelGLB = thumb.dataset.model;
+        let modelUSDZ = thumb.dataset.usdz;
 
-        // Se contiene animazione → play
+        viewer.src = modelGLB;
+        viewer.iosSrc = modelUSDZ;
+
         viewer.animationName = "*";
 
-        // highlight selezionato
         document.querySelectorAll(".thumb").forEach(t => t.classList.remove("selected"));
         thumb.classList.add("selected");
       });
