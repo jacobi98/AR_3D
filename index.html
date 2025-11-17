@@ -89,38 +89,7 @@
       object-fit: cover;
     }
 
-    /* AR BUTTON CUSTOM */
-    #customArBtn {
-      position: absolute;
-      bottom: 120px;
-      right: 20px;
-      width: 70px;
-      height: 70px;
-      background: white;
-      border-radius: 50%;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      z-index: 20;
-      box-shadow: 0 6px 24px rgba(0,0,0,0.4);
-      transition: 0.3s;
-    }
 
-    #customArBtn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
-    }
-
-    #customArBtn:active {
-      transform: scale(0.95);
-    }
-
-    /* Icona AR */
-    #customArBtn svg {
-      width: 36px;
-      height: 36px;
-    }
   </style>
 </head>
 
@@ -144,19 +113,7 @@
     shadow-softness="1">
   </model-viewer>
 
-  <!-- AR BUTTON -->
-  <div id="customArBtn" title="Attiva Realtà Aumentata">
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M21 16V8C21 6.89543 20.1046 6 19 6H5C3.89543 6 3 6.89543 3 8V16C3 17.1046 3.89543 18 5 18H19C20.1046 18 21 17.1046 21 16Z" stroke="#333" stroke-width="2" stroke-linecap="round"/>
-      <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#333" stroke-width="2"/>
-      <circle cx="7" cy="10" r="1" fill="#333"/>
-      <circle cx="17" cy="10" r="1" fill="#333"/>
-      <path d="M8 20H16" stroke="#333" stroke-width="2" stroke-linecap="round"/>
-      <path d="M12 18V20" stroke="#333" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-  </div>
-
-  <!-- MODEL SELECTOR -->
+<!-- MODEL SELECTOR -->
   <div id="selector">
     <div class="thumb selected" data-model="models/donna.glb" data-usdz="models/object1.usdz">
       <img src="thumbs/donna00.png" alt="Donna">
@@ -182,7 +139,6 @@
     const viewer = document.getElementById("viewer");
     const selector = document.getElementById("selector");
     const music = document.getElementById("bgMusic");
-    const customArBtn = document.getElementById("customArBtn");
 
     // START → musica + fade + mostra viewer
     startBtn.addEventListener("click", () => {
@@ -208,16 +164,6 @@
         viewer.animationName = animations[0];
         viewer.play();
       }
-      
-      // Mostra pulsante AR se disponibile
-      if (viewer.canActivateAR) {
-        customArBtn.style.display = "flex";
-      }
-    });
-
-    // Click sul pulsante AR
-    customArBtn.addEventListener("click", () => {
-      viewer.activateAR();
     });
 
     // CLICK SULLE MINIATURE
