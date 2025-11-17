@@ -21,7 +21,6 @@
       inset: 0;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
       z-index: 10;
@@ -31,7 +30,7 @@
     #startBtn {
       padding: 20px 50px;
       font-size: 1.3rem;
-      background: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.9);
       border: none;
       border-radius: 40px;
       cursor: pointer;
@@ -45,46 +44,12 @@
       background: white;
     }
 
-    /* DEBUG INFO */
-    #debugInfo {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.8);
-      color: #0f0;
-      padding: 10px;
-      font-size: 12px;
-      border-radius: 8px;
-      z-index: 100;
-      display: none;
-      max-width: 300px;
-      font-family: monospace;
-    }
-
     /* MODEL VIEWER */
     model-viewer {
       width: 100vw;
       height: 100vh;
       display: none;
       background: #1a1a1a;
-    }
-
-    /* AR BUTTON CUSTOM (se quello nativo non appare) */
-    #customArBtn {
-      position: absolute;
-      bottom: 120px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      background: white;
-      border-radius: 50%;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      z-index: 20;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      font-size: 24px;
     }
 
     /* THUMBNAILS */
@@ -123,23 +88,50 @@
       height: 100%;
       object-fit: cover;
     }
+
+    /* AR BUTTON CUSTOM */
+    #customArBtn {
+      position: absolute;
+      bottom: 120px;
+      right: 20px;
+      width: 70px;
+      height: 70px;
+      background: white;
+      border-radius: 50%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 20;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+      transition: 0.3s;
+    }
+
+    #customArBtn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    }
+
+    #customArBtn:active {
+      transform: scale(0.95);
+    }
+
+    /* Icona AR */
+    #customArBtn svg {
+      width: 36px;
+      height: 36px;
+    }
   </style>
 </head>
 
 <body>
-
-  <!-- DEBUG INFO -->
-  <div id="debugInfo">
-    <div>🔍 Debug AR Status:</div>
-    <div id="status">Premi START...</div>
-  </div>
 
   <!-- AUDIO -->
   <audio id="bgMusic" src="Snarky_Puppy_Lingus_We_Like_It_Here_.mp3" preload="auto" loop></audio>
 
   <!-- START PAGE -->
   <div id="startScreen">
-    <button id="startBtn">▶ START AR EXPERIENCE</button>
+    <button id="startBtn">▶ START</button>
   </div>
 
   <!-- 3D MODEL VIEWER -->
@@ -150,15 +142,19 @@
     shadow-intensity="1"
     exposure="1"
     shadow-softness="1">
-    
-    <!-- Slot per pulsante AR personalizzato -->
-    <button slot="ar-button" id="arButton" style="display:none;">
-      Attiva AR
-    </button>
   </model-viewer>
 
-  <!-- CUSTOM AR BUTTON -->
-  <div id="customArBtn">📱</div>
+  <!-- AR BUTTON -->
+  <div id="customArBtn" title="Attiva Realtà Aumentata">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 16V8C21 6.89543 20.1046 6 19 6H5C3.89543 6 3 6.89543 3 8V16C3 17.1046 3.89543 18 5 18H19C20.1046 18 21 17.1046 21 16Z" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+      <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#333" stroke-width="2"/>
+      <circle cx="7" cy="10" r="1" fill="#333"/>
+      <circle cx="17" cy="10" r="1" fill="#333"/>
+      <path d="M8 20H16" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+      <path d="M12 18V20" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div>
 
   <!-- MODEL SELECTOR -->
   <div id="selector">
@@ -186,22 +182,11 @@
     const viewer = document.getElementById("viewer");
     const selector = document.getElementById("selector");
     const music = document.getElementById("bgMusic");
-    const debugInfo = document.getElementById("debugInfo");
-    const status = document.getElementById("status");
     const customArBtn = document.getElementById("customArBtn");
 
-    // Funzione debug
-    function log(msg) {
-      console.log(msg);
-      status.innerHTML += '<br>' + msg;
-    }
-
     // START → musica + fade + mostra viewer
-    startBtn.addEventListener("click", async () => {
-      debugInfo.style.display = "block";
-      log("✅ START cliccato");
-      
-      music.play().catch(() => log("⚠️ Audio bloccato"));
+    startBtn.addEventListener("click", () => {
+      music.play().catch(() => {});
       startScreen.style.opacity = 0;
 
       setTimeout(() => {
@@ -209,56 +194,29 @@
         viewer.style.display = "block";
         selector.style.display = "flex";
         
-        log("🔄 Carico primo modello...");
-        
-        // CARICA IL PRIMO MODELLO
+        // Carica il primo modello
         viewer.src = "models/donna.glb";
         viewer.iosSrc = "models/object1.usdz";
-        
       }, 1000);
     });
 
-    // EVENTI MODEL VIEWER
+    // Quando il modello è caricato
     viewer.addEventListener('load', () => {
-      log("✅ Modello caricato!");
-      
       // Avvia animazione se presente
       const animations = viewer.availableAnimations;
       if (animations && animations.length > 0) {
         viewer.animationName = animations[0];
         viewer.play();
-        log("🎬 Animazione avviata");
       }
       
-      // Controlla supporto AR
-      checkAR();
-    });
-
-    viewer.addEventListener('error', (e) => {
-      log("❌ ERRORE: " + e.detail);
-    });
-
-    viewer.addEventListener('ar-status', (e) => {
-      log("📱 AR Status: " + e.detail.status);
-    });
-
-    // Verifica supporto AR
-    async function checkAR() {
-      const canAR = viewer.canActivateAR;
-      log("🔍 AR disponibile: " + canAR);
-      
-      if (canAR) {
-        log("✅ Cerca il pulsante AR nell viewer!");
+      // Mostra pulsante AR se disponibile
+      if (viewer.canActivateAR) {
         customArBtn.style.display = "flex";
-      } else {
-        log("❌ AR NON disponibile su questo device");
-        log("ℹ️ Serve HTTPS + device compatibile");
       }
-    }
+    });
 
-    // Custom AR button click
+    // Click sul pulsante AR
     customArBtn.addEventListener("click", () => {
-      log("🚀 Tento attivazione AR...");
       viewer.activateAR();
     });
 
@@ -267,8 +225,6 @@
       thumb.addEventListener("click", () => {
         let modelGLB = thumb.dataset.model;
         let modelUSDZ = thumb.dataset.usdz;
-
-        log("🔄 Cambio modello: " + modelGLB);
 
         // Evidenzia thumb selezionato
         document.querySelectorAll(".thumb").forEach(t => t.classList.remove("selected"));
@@ -279,11 +235,6 @@
         viewer.iosSrc = modelUSDZ;
       });
     });
-
-    // Verifica HTTPS
-    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-      log("⚠️ ATTENZIONE: Serve HTTPS per AR!");
-    }
   </script>
 
 </body>
