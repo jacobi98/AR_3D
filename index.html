@@ -21,6 +21,7 @@
       inset: 0;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       z-index: 10;
@@ -36,6 +37,7 @@
       cursor: pointer;
       backdrop-filter: blur(10px);
       transition: .3s;
+      font-weight: bold;
     }
 
     #startBtn:hover {
@@ -43,11 +45,46 @@
       background: white;
     }
 
+    /* DEBUG INFO */
+    #debugInfo {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.8);
+      color: #0f0;
+      padding: 10px;
+      font-size: 12px;
+      border-radius: 8px;
+      z-index: 100;
+      display: none;
+      max-width: 300px;
+      font-family: monospace;
+    }
+
     /* MODEL VIEWER */
     model-viewer {
       width: 100vw;
       height: 100vh;
       display: none;
+      background: #1a1a1a;
+    }
+
+    /* AR BUTTON CUSTOM (se quello nativo non appare) */
+    #customArBtn {
+      position: absolute;
+      bottom: 120px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: white;
+      border-radius: 50%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 20;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      font-size: 24px;
     }
 
     /* THUMBNAILS */
@@ -91,40 +128,54 @@
 
 <body>
 
+  <!-- DEBUG INFO -->
+  <div id="debugInfo">
+    <div>🔍 Debug AR Status:</div>
+    <div id="status">Premi START...</div>
+  </div>
+
   <!-- AUDIO -->
   <audio id="bgMusic" src="Snarky_Puppy_Lingus_We_Like_It_Here_.mp3" preload="auto" loop></audio>
 
   <!-- START PAGE -->
   <div id="startScreen">
-    <button id="startBtn">START</button>
+    <button id="startBtn">▶ START AR EXPERIENCE</button>
   </div>
 
   <!-- 3D MODEL VIEWER -->
   <model-viewer id="viewer"
-    src=""
-    ios-src=""
     ar
     ar-modes="webxr scene-viewer quick-look"
     camera-controls
-    shadow-intensity="1">
+    shadow-intensity="1"
+    exposure="1"
+    shadow-softness="1">
+    
+    <!-- Slot per pulsante AR personalizzato -->
+    <button slot="ar-button" id="arButton" style="display:none;">
+      Attiva AR
+    </button>
   </model-viewer>
+
+  <!-- CUSTOM AR BUTTON -->
+  <div id="customArBtn">📱</div>
 
   <!-- MODEL SELECTOR -->
   <div id="selector">
     <div class="thumb selected" data-model="models/donna.glb" data-usdz="models/object1.usdz">
-      <img src="thumbs/donna00.png">
+      <img src="thumbs/donna00.png" alt="Donna">
     </div>
 
     <div class="thumb" data-model="models/robot_giallo.glb" data-usdz="models/object2.usdz">
-      <img src="thumbs/robot_giallo01.png">
+      <img src="thumbs/robot_giallo01.png" alt="Robot Giallo">
     </div>
 
     <div class="thumb" data-model="models/robot_palla.glb" data-usdz="models/object3.usdz">
-      <img src="thumbs/robot_palla02.png">
+      <img src="thumbs/robot_palla02.png" alt="Robot Palla">
     </div>
 
     <div class="thumb" data-model="models/topo.glb" data-usdz="models/object4.usdz">
-      <img src="thumbs/topo03.png">
+      <img src="thumbs/topo03.png" alt="Topo">
     </div>
   </div>
 
@@ -135,10 +186,22 @@
     const viewer = document.getElementById("viewer");
     const selector = document.getElementById("selector");
     const music = document.getElementById("bgMusic");
+    const debugInfo = document.getElementById("debugInfo");
+    const status = document.getElementById("status");
+    const customArBtn = document.getElementById("customArBtn");
+
+    // Funzione debug
+    function log(msg) {
+      console.log(msg);
+      status.innerHTML += '<br>' + msg;
+    }
 
     // START → musica + fade + mostra viewer
-    startBtn.addEventListener("click", () => {
-      music.play().catch(() => {});
+    startBtn.addEventListener("click", async () => {
+      debugInfo.style.display = "block";
+      log("✅ START cliccato");
+      
+      music.play().catch(() => log("⚠️ Audio bloccato"));
       startScreen.style.opacity = 0;
 
       setTimeout(() => {
@@ -146,18 +209,57 @@
         viewer.style.display = "block";
         selector.style.display = "flex";
         
-        // CARICA IL PRIMO MODELLO DOPO LA TRANSIZIONE
+        log("🔄 Carico primo modello...");
+        
+        // CARICA IL PRIMO MODELLO
         viewer.src = "models/donna.glb";
         viewer.iosSrc = "models/object1.usdz";
-        viewer.animationName = "*";
         
-        // Aspetta che il modello sia caricato
-        viewer.addEventListener('load', () => {
-          if (viewer.canActivateAR) {
-            console.log("AR disponibile!");
-          }
-        }, { once: true });
-      }, 900);
+      }, 1000);
+    });
+
+    // EVENTI MODEL VIEWER
+    viewer.addEventListener('load', () => {
+      log("✅ Modello caricato!");
+      
+      // Avvia animazione se presente
+      const animations = viewer.availableAnimations;
+      if (animations && animations.length > 0) {
+        viewer.animationName = animations[0];
+        viewer.play();
+        log("🎬 Animazione avviata");
+      }
+      
+      // Controlla supporto AR
+      checkAR();
+    });
+
+    viewer.addEventListener('error', (e) => {
+      log("❌ ERRORE: " + e.detail);
+    });
+
+    viewer.addEventListener('ar-status', (e) => {
+      log("📱 AR Status: " + e.detail.status);
+    });
+
+    // Verifica supporto AR
+    async function checkAR() {
+      const canAR = viewer.canActivateAR;
+      log("🔍 AR disponibile: " + canAR);
+      
+      if (canAR) {
+        log("✅ Cerca il pulsante AR nell viewer!");
+        customArBtn.style.display = "flex";
+      } else {
+        log("❌ AR NON disponibile su questo device");
+        log("ℹ️ Serve HTTPS + device compatibile");
+      }
+    }
+
+    // Custom AR button click
+    customArBtn.addEventListener("click", () => {
+      log("🚀 Tento attivazione AR...");
+      viewer.activateAR();
     });
 
     // CLICK SULLE MINIATURE
@@ -166,6 +268,8 @@
         let modelGLB = thumb.dataset.model;
         let modelUSDZ = thumb.dataset.usdz;
 
+        log("🔄 Cambio modello: " + modelGLB);
+
         // Evidenzia thumb selezionato
         document.querySelectorAll(".thumb").forEach(t => t.classList.remove("selected"));
         thumb.classList.add("selected");
@@ -173,14 +277,13 @@
         // Cambia modello
         viewer.src = modelGLB;
         viewer.iosSrc = modelUSDZ;
-        
-        // Quando il modello è caricato, avvia l'animazione
-        viewer.addEventListener('load', () => {
-          viewer.animationName = "*";
-          viewer.play();
-        }, { once: true });
       });
     });
+
+    // Verifica HTTPS
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      log("⚠️ ATTENZIONE: Serve HTTPS per AR!");
+    }
   </script>
 
 </body>
