@@ -2,36 +2,103 @@
 <html lang="it">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
   <style>
-    html, body {
+    body {
       margin: 0;
-      height: 100%;
       background: #000;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
     }
+
     model-viewer {
       width: 100%;
-      height: 100%;
+      height: calc(100vh - 110px);
+      background: #000;
+    }
+
+    .thumbs {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      overflow-x: auto;
+      background: #111;
+    }
+
+    .thumbs img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      background: #fff;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 3px solid transparent;
+    }
+
+    .thumbs img.active {
+      border-color: #4ea3ff;
     }
   </style>
 </head>
 <body>
 
-  <model-viewer
-    src="topo.glb"
-    ios-src="topo.usdz"
-
-    alt="desk animato"
-    autoplay
-    auto-rotate
-    animation-name="*"
+  <!-- MODEL VIEWER -->
+  <model-viewer id="viewer"
+    src="models/donna.glb"
+    ios-src="models/object1.usdz"
     ar
+    autoplay
+    animation-name="*"
     camera-controls
     shadow-intensity="1">
   </model-viewer>
+
+  <!-- THUMBNAIL MENU -->
+  <div class="thumbs">
+
+    <img src="thumbs/donna00.png" 
+         class="active"
+         data-glb="models/donna.glb"
+         data-usdz="models/object1.usdz">
+
+    <img src="thumbs/robot giallo01.png"
+         data-glb="models/robot giallo.glb"
+         data-usdz="models/object2.usdz">
+
+    <img src="thumbs/robot palla02.png"
+         data-glb="models/robot palla.glb"
+         data-usdz="models/object3.usdz">
+
+    <img src="thumbs/topo03.png"
+         data-glb="models/topo.glb"
+         data-usdz="models/object4.usdz">
+
+  </div>
+
+  <script>
+    const viewer = document.getElementById("viewer");
+    const thumbs = document.querySelectorAll(".thumbs img");
+
+    thumbs.forEach(thumb => {
+      thumb.addEventListener("click", () => {
+
+        // Rimuove highlight
+        thumbs.forEach(t => t.classList.remove("active"));
+        thumb.classList.add("active");
+
+        // Cambia modello
+        viewer.src = thumb.dataset.glb;
+        viewer.iosSrc = thumb.dataset.usdz;
+
+        // Restart animazione
+        viewer.play();
+      });
+    });
+  </script>
 
 </body>
 </html>
