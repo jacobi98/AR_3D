@@ -89,7 +89,26 @@
       object-fit: cover;
     }
 
+    /* CUSTOM AR BUTTON */
+    #customArBtn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+      padding: 12px 24px;
+      font-size: 1rem;
+      background: rgba(0,224,255,0.9);
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      display: none;
+      font-weight: bold;
+      color: #000;
+    }
 
+    #customArBtn:hover {
+      background: #00e0ff;
+    }
   </style>
 </head>
 
@@ -113,7 +132,10 @@
     shadow-softness="1">
   </model-viewer>
 
-<!-- MODEL SELECTOR -->
+  <!-- CUSTOM AR BUTTON -->
+  <button id="customArBtn">View in AR</button>
+
+  <!-- MODEL SELECTOR -->
   <div id="selector">
     <div class="thumb selected" data-model="models/donna.glb" data-usdz="models/object1.usdz">
       <img src="thumbs/donna00.png" alt="Donna">
@@ -132,13 +154,13 @@
     </div>
   </div>
 
-
   <script>
     const startBtn = document.getElementById("startBtn");
     const startScreen = document.getElementById("startScreen");
     const viewer = document.getElementById("viewer");
     const selector = document.getElementById("selector");
     const music = document.getElementById("bgMusic");
+    const customArBtn = document.getElementById("customArBtn");
 
     // START → musica + fade + mostra viewer
     startBtn.addEventListener("click", () => {
@@ -149,10 +171,10 @@
         startScreen.style.display = "none";
         viewer.style.display = "block";
         selector.style.display = "flex";
-        
+
         // Carica il primo modello
         viewer.src = "models/donna.glb";
-        viewer.iosSrc = "models/object1.usdz";
+        viewer.setAttribute("ios-src", "models/object1.usdz");
       }, 1000);
     });
 
@@ -164,6 +186,16 @@
         viewer.animationName = animations[0];
         viewer.play();
       }
+
+      // Mostra pulsante AR se disponibile
+      if (viewer.canActivateAR) {
+        customArBtn.style.display = "block";
+      }
+    });
+
+    // Click sul pulsante AR
+    customArBtn.addEventListener("click", () => {
+      viewer.activateAR();
     });
 
     // CLICK SULLE MINIATURE
@@ -178,7 +210,7 @@
 
         // Cambia modello
         viewer.src = modelGLB;
-        viewer.iosSrc = modelUSDZ;
+        viewer.setAttribute("ios-src", modelUSDZ);
       });
     });
   </script>
